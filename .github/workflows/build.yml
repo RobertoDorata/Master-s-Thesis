@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: /Users/robertodorata/Downloads/sonar-scanner-4.7.0.2747-macosx/bin/sonar-scanner -Dsonar.login=fb728cc2a83c92b5a1928fed35b6e58aff3dde8d -Dsonar.projectKey=master-thesis_AR6raQHC2bMLKmVLLjv
+      - uses: /Users/robertodorata/Downloads/sonar-scanner-4.7.0.2747-macosx/bin/sonar-scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
