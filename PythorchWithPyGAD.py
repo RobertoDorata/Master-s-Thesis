@@ -90,3 +90,6 @@ print("Predictions : \n", predictions.detach().numpy())
 
 abs_error = loss_function(predictions, data_outputs)
 print("Absolute Error : ", abs_error.detach().numpy())
+
+#test github actions sonarqube
+a = "test sonarqube"
