@@ -93,4 +93,3 @@ print("Absolute Error : ", abs_error.detach().numpy())
 
 #test github actions sonarqube
 a = "test sonarqube"
-b = "test sonarqube"
