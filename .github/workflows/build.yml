@@ -1,22 +1,19 @@
-name: Build
+name: Some workflow
 on:
-  push:
-    branches:[ main ] # or the name of your main branch
+    pull_request:
+        branches: [master, main]
 jobs:
-  build:
-    name: Build
+  SonarScanner:
     runs-on: ubuntu-latest
+    name: Sonar Scanner
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-       - uses: sonarsource/sonarqube-quality-gate-action@master
-         timeout-minutes: 5
-         env:
-           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Scan code
+        uses: vtex/action-sonarqube@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }} # https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
+          host: ${{ secrets.SQHost }} # Variable set in the Github Secrets
+          token: ${{ secrets.SQToken }} # Variable set in the Github Secrets
