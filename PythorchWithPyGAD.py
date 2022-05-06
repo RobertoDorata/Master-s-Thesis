@@ -90,3 +90,4 @@ print("Predictions : \n", predictions.detach().numpy())
 
 abs_error = loss_function(predictions, data_outputs)
 print("Absolute Error : ", abs_error.detach().numpy())
+a = "test azure devops"
