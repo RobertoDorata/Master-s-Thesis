@@ -2,29 +2,76 @@ import pickle
 import torch
 import torch.nn as nn
 import random
+import DeepQNetwork
 import numpy as np
 
+
 class DQNAgent:
+    # non c'è epsilon perchè l'azione da compiere viene scelta deterministicamente, non serve sceglierla in modo epsilon-greedy
+    # gamma rappresenta il discount factor dei reward futuri. In questo caso sarà pari a e^(-r * delta t), con delta t la differenza tra le due date in cui è possibile esercitare l'opzione
+    # max_memory rappresenta la dimensione della rete di memoria
+    def __init__(self, gammma, input_dims, batch_size, n_actions, max_mem_size=100000):
+        self.gamma = gammma
+        self.K = 100
+        self.r = 0.016
+        self.T = 1.0
+        self.exTimes = [10,100]
+        self.action_space = [i for i in range(n_actions)]
+        self.mem_size = max_mem_size
+        self.batch_size = batch_size
+        self.mem_cntr = 0 #tiene conto della prima posizione disponibile in cui poter salvare la memoria dell'agente
+        input_layer = torch.nn.Linear(2, 128)
+        relu_layer = torch.nn.ReLU()
+        output_layer = torch.nn.Linear(128, 128)
 
-    def __init__(self, state_space, action_space, model, max_memory_size, batch_size, gamma, lr,
-                 dropout, exploration_max, exploration_min, exploration_decay, pretrained,K,r,T,exTimes):
+        self.Q_eval = DeepQNetwork.DeepQNetwork(input_dims, hidden_layer_dims=4, output_layer_dims=4, n_actions=n_actions)
+        self.state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
+        self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
+        self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
+        self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=np.float32)
 
-        # Define DQN Layers
-        self.state_space = state_space
-        self.action_space = action_space
-        self.pretrained = pretrained
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.K = K
-        self.r = r
-        self.T = T
-        self.exTimes = exTimes
+    def store_transition(self, state, action, reward, state2, done):
+        #Store a transition in the replay memory
+        index = self.mem_cntr % self.mem_size
+        self.state_memory[index] = state
+        self.new_state_memory[index] = state2
+        self.action_memory[index] = action
+        self.reward_memory[index] = reward
+        self.terminal_memory[index] = done
+        self.mem_cntr += 1
+
+    def choose_action(self, observation):
+        #se esercito
+        state = torch.tensor([observation]).to(self.Q_eval.device)
+        actions = self.Q_eval.forward(state)
+        action = torch.argmax(actions).item()
+        #se non esercito
+        action = 0
+
+        return action
+
+    def learn(self):
+        #usando l'algoritmo genetico, imposta i pesi della neural network
+        if self.mem_cntr < self.batch_size:
+            return
+
+        max_mem = min(self.mem_cntr, self.mem_size)
+        batch = np.random.choice(max_mem, self.batch_size, replace=False)
+        batch_index = np.arange(self.batch_size, dtype=np.int32)
+        state_batch = torch.tensor(self.state_memory[batch]).to(self.Q_eval.device)
+        new_state_batch = torch.tensor(self.new_state_memory[batch]).to(self.Q_eval.device)
+        reward_batch = torch.tensor(self.reward_memory[batch]).to(self.Q_eval.device)
+        action_batch = self.action_memory[batch]
+        terminal_batch = torch.tensor(self.terminal_memory[batch]).to(self.Q_eval.device)
+        q_eval = self.Q_eval.forward(state_batch)[batch_index, action_batch]
+        q_next = self.Q_eval.forward(new_state_batch)
+        q_next[terminal_batch] = 0.0
+        q_target = reward_batch + self.gamma * torch.max(q_next, dim=1)[0]
+
 
         # DQN network
         self.dqn = model
-
-        if self.pretrained:
-            self.dqn.load_state_dict(torch.load("DQN.pt", map_location=torch.device(self.device)))
-        self.optimizer = torch.optim.Adam(self.dqn.parameters(), lr=lr)
 
         # Create memory
         self.max_memory_size = max_memory_size
@@ -78,42 +125,18 @@ class DQNAgent:
         return STATE, ACTION, REWARD, STATE2, DONE
 
     def act(self, state, steps, sim_prices):
-        """Epsilon-greedy action
-        if random.random() < self.exploration_rate:
-            return torch.tensor([[random.randrange(self.action_space)]])
-        else:
-            return torch.argmax(self.dqn(state.to(self.device))).unsqueeze(0).unsqueeze(0).cpu()
-        """
-        actual_value = max(self.K - sim_prices[steps], 0.0) * np.exp(-self.r * self.T * (steps / 365))
-        continuation_value = 0
         action = 0
-        #posso esercitare solo nelle exTimes, o alla maturity
-        if(steps in self.exTimes):
-            print("posso esercitare, sono alla data ", steps)
-            for i in range(self.exTimes.index(steps), len(sim_prices)):
-                next_price = sim_prices[i]
-                continuation_value += max(self.K - next_price, 0.0) * np.exp(-self.r * self.T * (i / 365))
-            if(actual_value > continuation_value):
-                #esercito
-                action = 1
-        #non sono nelle exTimes, vedo se sono almento alla maturity
-        else:
-            if(steps == 365):
-                continuation_value = max(self.K - sim_prices[-1], 0.0) * np.exp(-self.r * self.T)
-                if(actual_value > continuation_value):
-                    # esercito
-                    action = 1
-            #non sono ne alle ex times ne alla maturity, non posso esercitare
-            else:
-                print("non posso esercitare, sono alla data ",steps)
-        print("actual: ", actual_value)
-        print("continuation: ", continuation_value)
-        print("action: ", action)
+        print('steps: ', steps)
+        print('state: ', state)
+        # posso esercitare solo nelle exTimes, o alla maturity
+        if (steps in self.exTimes or steps == 365):
+            action = 1
+        # non sono nelle exTimes, vedo se sono almento alla maturity
         return action
 
     def experience_replay(self):
-        #print('memory sample size: ', self.memory_sample_size)
-        #print('num in queue: ', self.num_in_queue)
+        # print('memory sample size: ', self.memory_sample_size)
+        # print('num in queue: ', self.num_in_queue)
         if self.memory_sample_size > self.num_in_queue:
             return 100
 
@@ -125,15 +148,20 @@ class DQNAgent:
         STATE2 = STATE2.to(self.device)
         DONE = DONE.to(self.device)
 
-        self.optimizer.zero_grad()
         # Q-Learning target is Q*(S, A) <- r + γ max_a Q(S', a)
-        target = REWARD + torch.mul((self.gamma * self.dqn(STATE2).max(1).values.unsqueeze(1)), 1 - DONE)
+        # se l'azione è stop
+        if (ACTION == 1):
+            target = REWARD
+        else:
+            # se l'azione è esercitare
+            target = REWARD + self.gamma * torch.max(self.dqn(STATE2, 1), self.dqn(STATE2, 0))
+            # q function
+        # target = REWARD + torch.mul((self.gamma * self.dqn(STATE2).max(1).values.unsqueeze(1)), 1 - DONE)
         current = self.dqn(STATE).gather(1, ACTION.long())
 
         loss = self.l1(current, target)
-        #print('loss: ', loss.item())
+        # print('loss: ', loss.item())
         loss.backward()  # Compute gradients
-        self.optimizer.step()  # Backpropagate error
 
         self.exploration_rate *= self.exploration_decay
 
