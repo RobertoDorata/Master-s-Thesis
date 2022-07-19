@@ -67,16 +67,22 @@ class dqnAgent:
         if action == 1:
             K = state_batch[0][1].item()
             S1 = state_batch[0][0].item()
-            q_target = temp_reward + max(K - S1, 0.0)
-        else:
-            temp_action = action_batch
-            temp_action[0] = 1
-            a = self.Q_eval.forward(new_state_batch)[batch_index, temp_action]
-            b = self.Q_eval.forward(new_state_batch)[batch_index, action_batch]
-            temp_reward = reward_batch
-            for j in range(len(temp_reward)):
-                temp_reward[j] = 0
-            q_target = temp_reward + self.gamma * torch.maximum(a, b)[0] #qui andra messa la q function del paper
+            #q_target = temp_reward + max(K - S1, 0.0)
+        #else:
+        #    temp_action = action_batch
+            #temp_action[0] = 0
+            #a = self.Q_eval.forward(new_state_batch)[batch_index, temp_action]
+            #b = self.Q_eval.forward(new_state_batch)[batch_index, action_batch]
+            #temp_reward = reward_batch
+            #temp_reward_zeros = temp_reward
+            #for j in range(len(temp_reward_zeros)):
+            #    temp_reward_zeros[j] = 0
+            #q_target = temp_reward_zeros + self.gamma * torch.maximum(a, b)[0] #qui andra messa la q function del paper
+        temp_action = action_batch
+        temp_action[0] = 1
+        a = self.Q_eval.forward(new_state_batch)[batch_index, temp_action]
+        b = self.Q_eval.forward(new_state_batch)[batch_index, action_batch]
+        q_target = temp_reward + self.gamma * torch.maximum(a, b)[0]
         loss = self.Q_eval.loss(q_target, q_eval)
         #loss.backward()
         if self.epsilon > self.epsilon_end:
