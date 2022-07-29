@@ -11,8 +11,8 @@ import pickle
 
 class bermudanOption:
     def __init__(self):
-        self.env = bermudanOptionEnvironment.bermudanOptionEnv(1, 0.05, 38, 0, 38*365)
-        self.agent = dqnAgent.dqnAgent(gamma=np.exp(-0.05 * 1 / 252), batch_size=1, epsilon=1.0, n_actions=2)
+        self.env = bermudanOptionEnvironment.bermudanOptionEnv(1, 0.05, 38, 0, 365)
+        self.agent = dqnAgent.dqnAgent(gamma=np.exp(-0.05 * 1 / 252), batch_size=1, epsilon=0.9, n_actions=2)
 
     def getScore(self, netParams):
         score = 0
@@ -58,22 +58,26 @@ class bermudanOption:
         :param netParams: a list of floats representing the network parameters (weights and biases) of the MLP
         """
 
-        pickle.dump(netParams, open("cart-pole-data.pickle", "wb"))
+        pickle.dump(netParams, open("bermudan_option_params.pickle", "wb"))
 
-    def replayWithSavedParams(self, netParams):
+    def replayWithSavedParams(self):
+        netParams = pickle.load(open("bermudan_option_params.pickle", "rb"))
+        print("gioco dopo che ho salvato i parametri")
         score = 0
         giorniPassati = 0
+        disc_fact = np.exp(-0.05 * 1 / 252)
         self.agent.set_parameters(netParams)
         observation = self.env.reset()
+        print("observation = ", observation)
         while True:
             action = self.agent.choose_action(observation)
             new_observation, reward, done, info = self.env.step(action, giorniPassati)
-            score += reward
+            score += disc_fact * reward
             giorniPassati += 1
             observation = new_observation
             if done:
                 break
-        print("score: ",score)
+        print("score: ", score)
 
     def replay(self, netParams):
         """
@@ -82,8 +86,6 @@ class bermudanOption:
         """
         mlp = self.initMlp(netParams)
 
-        self.env.render()
-
         actionCounter = 0
         totalReward = 0
         observation = self.env.reset()
@@ -91,8 +93,7 @@ class bermudanOption:
 
         while True:
             actionCounter += 1
-            self.env.render()
-            observation, reward, done, info = self.env.step(action)
+            observation, reward, done, info = self.env.step(action,actionCounter)
             totalReward += reward
 
             print(actionCounter, ": --------------------------")

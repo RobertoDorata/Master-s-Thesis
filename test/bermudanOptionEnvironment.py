@@ -12,7 +12,7 @@ class bermudanOptionEnv:
         self.T1 = T1
         self.done = False
         self.action_space = [0, 1] # 0: hold, 1:exercise
-        self.S1 = []
+        self.S1 = self.simulateUnderlyingPrice(1, 0.05, 38, 0.2, 365, 1)
         self.info = []
         self.observation = np.array([0, 0, 0.0, 0.0])
         # plt.xlabel('Date')
@@ -22,11 +22,14 @@ class bermudanOptionEnv:
 
     def step(self, action, i):
         # stop
-        if action == 1 or i == ((38*365)-1):
+        print("K: ", self.K)
+        print("S1: ", self.S1[i][0])
+        if action == 1 or i == ((365)-1):
+            print(action, i)
             # il discount factor per un'opzione bermmudana è dato da e^(-r * delta t), con delta t la differenza tra le due date in cui è possibile esercitare
-            self.reward = max(self.K - self.S1[i], 0.0) # payoff di una put option
+            self.reward = max(self.K - self.S1[i][0], 0.0) # payoff di una put option
             self.done = True
-            self.observation = np.array([self.S1[i], 1, 38, 38*365])
+            self.observation = np.array([self.S1[i][0], 1, 38, 365])
             # observation: il valore del sottostante e il valore dell'opzione
             # vedere se aggiungere anche il continuation value dell'opzione
             # va aggiunta anche la prossima data in cui è possibile esercitare l'opzione, e la data precedente
@@ -34,6 +37,8 @@ class bermudanOptionEnv:
         # continue
         else:
             self.reward = 0
+        print("azione: ", action)
+        print("reward: ", self.reward)
 
         return self.observation, self.reward, self.done, self.info
 
@@ -42,8 +47,8 @@ class bermudanOptionEnv:
         self.day_step = 0  # from day 0 taking N steps to day N
         self.done = False
         self.action_space = [0, 1]  # 0: hold, 1:exercise
-        self.S1 = self.simulateUnderlyingPrice(1, 0.05, 38, 0.2, 1, 38*365)[1]
-        return np.array([self.S1[0], 1, 0.419, 153.0])
+        self.S1 = self.simulateUnderlyingPrice(1, 0.05, 38, 0.2, 365, 1)
+        return np.array([self.S1[0][0], 1, 0.419, 153.0])
 
     def simulateUnderlyingPrice(self, S0, r, T, sigma, M, I):
         dt = float(T) / M
@@ -53,5 +58,8 @@ class bermudanOptionEnv:
             rand = np.random.standard_normal(I)
             paths[t] = paths[t - 1] * np.exp((r - 0.5 * sigma ** 2) * dt +
                                              sigma * np.sqrt(dt) * rand)
-            paths[t] = paths[t]
+        # plt.xlabel('Date')
+        # plt.ylabel('Stock Price')
+        # plt.plot(paths)
+        # plt.show()
         return paths

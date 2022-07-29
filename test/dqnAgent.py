@@ -35,12 +35,18 @@ class dqnAgent:
 
     def choose_action(self, observation):
         # epsilon greedy strategy
-        if np.random.random() > self.epsilon:
+        a = np.random.random()
+        # print("epsilon: ",self.epsilon)
+        # print("a: ",a)
+        if a > self.epsilon:
+            # print("sono nell'if ")
             state = torch.tensor(observation, dtype=torch.float32)
             state = state.expand(4, 4)
             actions = self.Q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
+            # print("obs 1: ",observation[1], "obs 0: ", observation[0])
+            # print((observation[1] > observation[0]))
             if(observation[1] > observation[0]):
                 action = 1
             else:
@@ -53,38 +59,24 @@ class dqnAgent:
         max_mem = min(self.mem_counter, self.mem_size)
         batch = np.random.choice(max_mem, self.batch_size, replace=False)
         batch_index = np.arange(self.batch_size, dtype=np.int32)
-        state_batch = torch.tensor(self.state_memory[batch], dtype=torch.float32)
-        new_state_batch = torch.tensor(self.new_state_memory[batch], dtype=torch.float32)
-        reward_batch = torch.tensor(self.reward_memory[batch], dtype=torch.float32)
-        temp_reward = reward_batch
-        for j in range(len(temp_reward)):
-            temp_reward[j] = 0
-        terminal_batch = torch.tensor(self.terminal_memory[batch], dtype=torch.bool)
-        action_batch = self.action_memory[batch]
-        q_eval = self.Q_eval.forward(state_batch)[batch_index, action_batch]
-        q_next = self.Q_eval.forward(new_state_batch)
+        state_batch = torch.tensor(self.state_memory[batch], dtype=torch.float32) #da numpy array a pytorch tensor
+        new_state_batch = torch.tensor(self.new_state_memory[batch], dtype=torch.float32) #da numpy array a pytorch tensor
+        reward_batch = torch.tensor(self.reward_memory[batch], dtype=torch.float32) #da numpy array a pytorch tensor
+        terminal_batch = torch.tensor(self.terminal_memory[batch], dtype=torch.bool) #da numpy array a pytorch tensor
+        action_batch = self.action_memory[batch] #questo può rimanere un numpy array
+        q_eval = self.Q_eval.forward(state_batch)[batch_index, action_batch]  #valore della q function per lo stato corrente
+        q_next = self.Q_eval.forward(new_state_batch) #valore della q function stimato per lo stato successivo
+        print("nuovi stati: ", new_state_batch)
+        print("q_eval: ", q_eval)
+        print("q_next: ", q_next)
+        # print("reward_batch: ",reward_batch)
         q_next[terminal_batch] = 0.0
-        if action == 1:
-            K = state_batch[0][1].item()
-            S1 = state_batch[0][0].item()
-            #q_target = temp_reward + max(K - S1, 0.0)
-        #else:
-        #    temp_action = action_batch
-            #temp_action[0] = 0
-            #a = self.Q_eval.forward(new_state_batch)[batch_index, temp_action]
-            #b = self.Q_eval.forward(new_state_batch)[batch_index, action_batch]
-            #temp_reward = reward_batch
-            #temp_reward_zeros = temp_reward
-            #for j in range(len(temp_reward_zeros)):
-            #    temp_reward_zeros[j] = 0
-            #q_target = temp_reward_zeros + self.gamma * torch.maximum(a, b)[0] #qui andra messa la q function del paper
-        temp_action = action_batch
-        temp_action[0] = 1
-        a = self.Q_eval.forward(new_state_batch)[batch_index, temp_action]
-        b = self.Q_eval.forward(new_state_batch)[batch_index, action_batch]
-        q_target = temp_reward + self.gamma * torch.maximum(a, b)[0]
+        if(action == 1):
+            q_target = reward_batch
+        else:
+            q_target = reward_batch + self.gamma * torch.max(q_next, dim=1)[0] #[0] è il valore massimo, perchè torch.max ritorna sia il valore massimo che l'indice del massimo
         loss = self.Q_eval.loss(q_target, q_eval)
-        #loss.backward()
+        loss.backward()
         if self.epsilon > self.epsilon_end:
             self.epsilon -= self.epsilon_decay
         else:

@@ -1,5 +1,4 @@
 import sys
-
 import pygad
 import pygad.gann as gann
 import bermudanOption
@@ -24,11 +23,11 @@ def callback_generation(ga_instance):
     population_matrices = gann.population_as_matrices(population_networks=GANN_instance.population_networks, population_vectors=ga_instance.population)
     GANN_instance.update_population_trained_weights(population_trained_weights=population_matrices)
     last_fitness = ga_instance.best_solution()[1].copy()
-    # print("Generation = {generation}".format(generation=ga_instance.generations_completed))
-    # print("Fitness = {fitness}".format(fitness=ga_instance.best_solution()[1]))
+    print("Generation = {generation}".format(generation=ga_instance.generations_completed))
+    print("Fitness = {fitness}".format(fitness=ga_instance.best_solution()[1]))
 
 #create an instance of the neural network, of the type multilayer perceptron, and make the training using the PyGad library
-num_solutions = 10 #Number of neural networks (i.e. solutions) in the population.
+num_solutions = 2#10 #Number of neural networks (i.e. solutions) in the population.
 num_neurons_input = 4
 num_neurons_hidden_layers = [4] #lista di 1 solo elemento perchè c'è un solo hidden layer
 num_neurons_output_layer = 4
@@ -45,9 +44,9 @@ last_fitness = 0
 
 initial_population = population_vectors.copy()
 
-num_parents_mating = 4
+num_parents_mating = 2#4
 
-num_generations = 5
+num_generations = 1#5
 
 mutation_percent_genes = 5
 
@@ -83,5 +82,5 @@ print("Index of the best solution : {solution_idx}".format(solution_idx=solution
 if ga_instance.best_solution_generation != -1:
     print("Best fitness value reached after {best_solution_generation} generations.".format(best_solution_generation=ga_instance.best_solution_generation))
 
-bermudanOption.replayWithSavedParams(layers_weights)
+bermudanOption.saveParams(layers_weights)
 
