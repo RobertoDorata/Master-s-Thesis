@@ -1,0 +1,11 @@
+
+qpython:S116"NRename this field "Q_eval" to match the regular expression ^[_a-z][_a-z0-9]*$.(Ûòÿúÿÿÿÿÿ8¦»¯²0
+mpython:S116"ORename this field "exTimes" to match the regular expression ^[_a-z][_a-z0-9]*$.(õÀ‡±8¥»¯²0
+Rpython:S1481".Remove the unused local variable "relu_layer".(–ûå‰ûÿÿÿÿ8¦»¯²0
+Opython:S1481"0Remove the unused local variable "output_layer".(®Âœ®8¦»¯²0
+Npython:S1481"/Remove the unused local variable "input_layer".(ãÆÏ´8§»¯²0
+opython:S18540"KRemove this assignment to local variable 'action'; the value is never used.(ˆ¥¡îüÿÿÿÿ8§»¯²0
+Ipython:S1481C"*Remove the unused local variable "q_eval".(¯ˆş­8§»¯²0
+Kpython:S1481F",Remove the unused local variable "q_target".(·€ˆ8§»¯²0
+Vpython:S1172"2Remove the unused function parameter "sim_prices".(ííú‘ÿÿÿÿÿ8¨»¯²0
+>python:S125Š"Remove this commented out code.(±ˆÙ8¨»¯²0

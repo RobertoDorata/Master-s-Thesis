@@ -1,0 +1,23 @@
+
+spython:S116"URename this field "isRiskNeutral" to match the regular expression ^[_a-z][_a-z0-9]*$.(¿‹’Š8²éšÜœ0
+qpython:S116"NRename this field "stepBM" to match the regular expression ^[_a-z][_a-z0-9]*$.(Áƒßøÿÿÿÿ8±éšÜœ0
+npython:S116"PRename this field "option_T" to match the regular expression ^[_a-z][_a-z0-9]*$.(ğ“Š8®éšÜœ0
+spython:S116"URename this field "randomIndexes" to match the regular expression ^[_a-z][_a-z0-9]*$.(²®Èş8¯éšÜœ0
+ppython:S117"TRename this parameter "option_T" to match the regular expression ^[_a-z][a-z0-9_]*$.(àä¿Ûøÿÿÿÿ
+Dpython:S1481"%Remove the unused local variable "i".(²®Èş8µéšÜœ0
+apython:S112(">Replace this generic exception class with a more specific one.(ãóçßùÿÿÿÿ8¶éšÜœ0
+\python:S112-">Replace this generic exception class with a more specific one.(³÷€Ÿ8¸éšÜœ0
+qpython:S117©"RRename this parameter "isReal" to match the regular expression ^[_a-z][a-z0-9_]*$.(”ñÖ8¹éšÜœ0
+€python:S117¬"\Rename this local variable "optionPrice" to match the regular expression ^[_a-z][a-z0-9_]*$.(ŒÏÁŒıÿÿÿÿ8»éšÜœ0
+qpython:S100©"RRename method "getOptionPrice" to match the regular expression ^[a-z_][a-z0-9_]*$.(”ñÖ8¼éšÜœ0
+vpython:S117¯"RRename this parameter "isReal" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ä¸¥âıÿÿÿÿ8½éšÜœ0
+python:S117¾"jRename this local variable "observationsForMuAndSigma" to match the regular expression ^[_a-z][a-z0-9_]*$.(‚ñ•±şÿÿÿÿ8¿éšÜœ0
+upython:S100¯"QRename method "getParameters" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ä¸¥âıÿÿÿÿ8ÀéšÜœ0
+qpython:S117Ğ"MRename this parameter "K" to match the regular expression ^[_a-z][a-z0-9_]*$.(ƒÇ®çûÿÿÿÿ8ÁéšÜœ0
+qpython:S117Ğ"MRename this parameter "S" to match the regular expression ^[_a-z][a-z0-9_]*$.(ƒÇ®çûÿÿÿÿ8ÃéšÜœ0
+qpython:S117Ğ"MRename this parameter "T" to match the regular expression ^[_a-z][a-z0-9_]*$.(ƒÇ®çûÿÿÿÿ8ÄéšÜœ0
+{python:S117Ş"WRename this local variable "deltaT" to match the regular expression ^[_a-z][a-z0-9_]*$.(ÏÆ¥İÿÿÿÿÿ8ÅéšÜœ0
+ƒpython:S117€"_Rename this local variable "exerciseOnDay1" to match the regular expression ^[_a-z][a-z0-9_]*$.(µâúïüÿÿÿÿ8ÇéšÜœ0
+}python:S117Ğ"YRename this parameter "isRiskNeutral" to match the regular expression ^[_a-z][a-z0-9_]*$.(ƒÇ®çûÿÿÿÿ8ÈéšÜœ0
+|python:S100Ğ"XRename method "binomialTreeExercise" to match the regular expression ^[a-z_][a-z0-9_]*$.(ƒÇ®çûÿÿÿÿ8ÉéšÜœ0
+ypython:S3776Ğ"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(ƒÇ®çûÿÿÿÿ8ÖéšÜœ0
